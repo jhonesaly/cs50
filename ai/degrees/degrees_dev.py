@@ -3,7 +3,6 @@ import sys
 
 from util import Node, StackFrontier, QueueFrontier
 from pprint import pprint
-import json
 
 # Maps names to a set of corresponding person_ids
 names = {}
@@ -54,7 +53,7 @@ def load_data(directory):
                 pass
 
 
-def shortest_path(source, target) -> list:
+def shortest_path(source, target):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
@@ -62,33 +61,92 @@ def shortest_path(source, target) -> list:
     If no possible path, returns None.
     """
 
-    
-
+    start = Node(state=source, parent=None, action=None)
+    goal = Node(state=target, parent=None, action=None)
+    frontier = QueueFrontier()
+    explored = set()
     response = []
 
-    return response
+    frontier.add(start)
+    i = 0
+
+    while True:
+        i+=1
+        print(f"\n---iteration {i}---")
+        print(f"initial frontier:")
+        for node in frontier.frontier:
+            print(f"{person_name(node.state)}")
+        
+        print(f"explored:")
+        for node in explored:
+            print(f"{person_name(node.state)}")
+
+        if frontier.empty():
+            return None
+        
+        node = frontier.remove()
+        print(f"selected node: {person_name(node.state)}")
+        print(f"goal node: {person_name(goal.state)}")
+
+        if node.state == goal.state:
+            print("\n---Found a solution!---")
+            while node.parent is not None:
+                response.append((node.action, node.state))
+                node = node.parent
+            break
+
+        if node.state != goal.state:
+            explored.add(node)
+            for action, state in neighbors_for_person(node.state):
+                if not frontier.contains_state(state) and not any(n.state == state for n in explored):
+                    child = Node(state=state, parent=node, action=action)
+                    frontier.add(child)
+
+    return response[::-1]
+
+def parse_args():
+    """
+    Parse command line arguments in the format: key=value
+    Returns a dictionary with the parsed arguments.
+    """
+    kwargs = {}
+    for arg in sys.argv[1:]:
+        if '=' in arg:
+            key, value = arg.split('=', 1)
+            kwargs[key] = value
+    return kwargs
+
 
 def main():
     print(f"argumentos sys.argv: {sys.argv}")
-    if len(sys.argv) > 2:
-        sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    
+    # Parse arguments
+    kwargs = parse_args()
+    directory = kwargs.get('directory', 'small')
+    source_input = kwargs.get('source', "Tom Cruise")
+    target_input = kwargs.get('target', "Tom Hanks")
 
     # Load data from files into memory
     print(f"Loading data from {directory}...")
     load_data(directory)
     print("Data loaded.")
-    print(json.dumps(people, indent=2, ensure_ascii=False, default=list))
 
-    source = person_id_for_name(input("Name: "))
-    print(f"source id: {source}")
-    print(type(source))
+    # Get source name (from argument or input)
+    if source_input is None:
+        source = person_id_for_name(input("Name: "))
+    else:
+        source = person_id_for_name(source_input)
+    print(f"source name: {source_input}, id: {source}")
 
     if source is None:
         sys.exit("Person not found.")
-    target = person_id_for_name(input("Name: "))
-    print(f"target id: {target}")
-    print(type(target))
+    
+    # Get target name (from argument or input)
+    if target_input is None:
+        target = person_id_for_name(input("Name: "))
+    else:
+        target = person_id_for_name(target_input)
+    print(f"target name: {target_input}, id: {target}")
 
     if target is None:
         sys.exit("Person not found.")
@@ -132,6 +190,18 @@ def person_id_for_name(name):
         return None
     else:
         return person_ids[0]
+    
+def person_name(id):
+    """
+    Returns the name of the person for a given id.
+    """
+    return people[id]["name"]
+
+def movie_title(id):
+    """
+    Returns the name of the movie for a given id.
+    """
+    return movies[id]["title"]
 
 
 def neighbors_for_person(person_id):
