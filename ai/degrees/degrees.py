@@ -1,7 +1,7 @@
 import csv
 import sys
 
-from ai.degrees.util import Node, StackFrontier, QueueFrontier
+from util import Node, StackFrontier, QueueFrontier
 
 # Maps names to a set of corresponding person_ids
 names = {}
