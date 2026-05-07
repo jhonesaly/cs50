@@ -92,6 +92,7 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
+    # config
     start = Node(state=source, parent=None, action=None)
     goal = Node(state=target, parent=None, action=None)
     frontier = QueueFrontier()
@@ -99,47 +100,45 @@ def shortest_path(source, target):
     response = []
 
     frontier.add(start)
-    i = 0
 
+    # loop
     while True:
-        i+=1
-        print(f"\n---iteration {i}---")
-        print(f"initial frontier:")
-        for node in frontier.frontier:
-            print(f"{person_name(node.state)}")
-        
-        print(f"explored:")
-        for node in explored:
-            print(f"{person_name(node.state)}")
 
+        # there are no more nodes to explore
         if frontier.empty():
             return None
         
-        node = frontier.remove()
-        print(f"selected node: {person_name(node.state)}")
-        print(f"goal node: {person_name(goal.state)}")
+        node = frontier.remove() # selection of node
 
+        # selected node is the goal
         if node.state == goal.state:
-            print("\n---Found a solution!---")
+            # backtrack to construct the path
             while node.parent is not None:
                 response.append((node.action, node.state))
                 node = node.parent
             break
 
+        # selected node is not the goal
         if node.state != goal.state:
-            explored.add(node)
+            explored.add(node) # mark node as explored
+            
+            # add neighbors to node
             for action, state in neighbors_for_person(node.state):
+                # only add neighbor if it is not already in frontier or explored
                 if not frontier.contains_state(state) and not any(n.state == state for n in explored):
                     child = Node(state=state, parent=node, action=action)
                     frontier.add(child)
 
+    # reverse the path to get it from source to target
     return response[::-1]
+
 
 def person_name(id):
     """
     Returns the name of the person for a given id.
     """
     return people[id]["name"]
+
 
 def movie_title(id):
     """
