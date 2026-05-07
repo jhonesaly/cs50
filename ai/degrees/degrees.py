@@ -84,16 +84,68 @@ def main():
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
-def shortest_path(source, target) -> list:
+def shortest_path(source, target):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
 
     If no possible path, returns None.
     """
+
+    start = Node(state=source, parent=None, action=None)
+    goal = Node(state=target, parent=None, action=None)
+    frontier = QueueFrontier()
+    explored = set()
     response = []
 
-    return response
+    frontier.add(start)
+    i = 0
+
+    while True:
+        i+=1
+        print(f"\n---iteration {i}---")
+        print(f"initial frontier:")
+        for node in frontier.frontier:
+            print(f"{person_name(node.state)}")
+        
+        print(f"explored:")
+        for node in explored:
+            print(f"{person_name(node.state)}")
+
+        if frontier.empty():
+            return None
+        
+        node = frontier.remove()
+        print(f"selected node: {person_name(node.state)}")
+        print(f"goal node: {person_name(goal.state)}")
+
+        if node.state == goal.state:
+            print("\n---Found a solution!---")
+            while node.parent is not None:
+                response.append((node.action, node.state))
+                node = node.parent
+            break
+
+        if node.state != goal.state:
+            explored.add(node)
+            for action, state in neighbors_for_person(node.state):
+                if not frontier.contains_state(state) and not any(n.state == state for n in explored):
+                    child = Node(state=state, parent=node, action=action)
+                    frontier.add(child)
+
+    return response[::-1]
+
+def person_name(id):
+    """
+    Returns the name of the person for a given id.
+    """
+    return people[id]["name"]
+
+def movie_title(id):
+    """
+    Returns the name of the movie for a given id.
+    """
+    return movies[id]["title"]
 
 
 def person_id_for_name(name):
