@@ -123,7 +123,57 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
+    # If the game is already over, there is no move to make
+    if terminal(board):
+        return None
+
+    current_player = player(board)
+    best_move = None
+
+    # The AI explores each possible action to find the one with the best value
+    if current_player == X:
+        best_value = -float('inf')
+        for action in actions(board):
+            # X wants to maximize the value returned by get_value
+            value = get_value(result(board, action))
+            if value > best_value:
+                best_value = value
+                best_move = action
+    else:
+        best_value = float('inf')
+        for action in actions(board):
+            # O wants to minimize the value returned by get_value
+            value = get_value(result(board, action))
+            if value < best_value:
+                best_value = value
+                best_move = action
+
+    return best_move
+
+
+def get_value(board):
+    """
+    Recursively calculates the utility value of a given board state.
+    """
+    # Base case: if the game is over, return the score (1, 0, or -1)
+    if terminal(board):
+        return utility(board)
+
+    curr_player = player(board)
+    
+    if curr_player == X:
+        v = -float('inf')
+        for action in actions(board):
+            # X plays and seeks the maximum possible outcome
+            v = max(v, get_value(result(board, action)))
+        return v
+    else:
+        v = float('inf')
+        for action in actions(board):
+            # O plays and seeks the minimum possible outcome
+            v = min(v, get_value(result(board, action)))
+        return v
+
 
 def random_move(board):
     """
@@ -176,7 +226,7 @@ if __name__ == "__main__":
             row, col = map(int, player_move.split(','))
             board = result(board, (row, col))
         else:
-            ai_move = random_move(board)
+            ai_move = minimax(board)
             board = result(board, ai_move)
     print("Game over.")
     print_board(board)
