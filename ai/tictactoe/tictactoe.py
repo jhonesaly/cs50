@@ -4,6 +4,7 @@ Tic Tac Toe Player
 
 import math
 import copy
+import random
 
 X = "X"
 O = "O"
@@ -23,42 +24,99 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    raise NotImplementedError
+    num_x = 0
+    num_o = 0
+
+    for i in board:
+        for j in i:
+            if j == X:
+                num_x += 1
+            elif j == O:
+                num_o += 1
+    
+    if num_x <= num_o:
+        return X
+    else:
+        return O
 
 
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    possible_actions = set()
+
+    for r, row in enumerate(board):
+        for c, val in enumerate(row):
+            if val == EMPTY:
+                possible_actions.add((r, c))
+
+    return possible_actions
 
 
 def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    raise NotImplementedError
+    board_result = copy.deepcopy(board)
+    board_result[action[0]][action[1]] = player(board)
+    return board_result
 
 
 def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
-    raise NotImplementedError
+    # Monta `list_x` e `list_o` coletando coordenadas (linha, coluna) de cada símbolo
+    list_x = {(r, c) for r, row in enumerate(board) for c, val in enumerate(row) if val == X}
+    list_o = {(r, c) for r, row in enumerate(board) for c, val in enumerate(row) if val == O}
+
+    winning_combinations = [
+        # horizontally
+        {(0, 0), (0, 1), (0, 2)},
+        {(1, 0), (1, 1), (1, 2)},
+        {(2, 0), (2, 1), (2, 2)},
+        # vertically
+        {(0, 0), (1, 0), (2, 0)},
+        {(0, 1), (1, 1), (2, 1)},
+        {(0, 2), (1, 2), (2, 2)},
+        # diagonally
+        {(0, 0), (1, 1), (2, 2)},
+        {(0, 2), (1, 1), (2, 0)}
+    ]
+
+    for combination in winning_combinations:
+        if combination.issubset(list_x):
+            return X
+        if combination.issubset(list_o):
+            return O
+
+    return None
 
 
 def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    raise NotImplementedError
+    if winner(board) is not None:
+        return True
+    for i in board:
+        for j in i:
+            if j == EMPTY:
+                return False
+    return True
 
 
 def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-    raise NotImplementedError
+    if winner(board) == X:
+        return 1
+    elif winner(board) == O:
+        return -1
+    else:
+        return 0
 
 
 def minimax(board):
@@ -66,6 +124,14 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     raise NotImplementedError
+
+def random_move(board):
+    """
+    Returns a random action for the current player on the board.
+    """
+    possible_actions = actions(board)
+    return random.choice(list(possible_actions))
+
 
 def print_board(board):
     for i, row in enumerate(board):
@@ -100,9 +166,18 @@ def print_board_list(boards):
             print("   ".join(["-----------"] * num_boards))
 
 if __name__ == "__main__":
-    board_list = []
-    board1 = initial_state()
-    board2 = copy.deepcopy(board1)
-    board_list.append(board1)
-    board_list.append(board2)
-    print_board_list(board_list)
+    board = initial_state()
+
+    while terminal(board) == False:
+        print_board(board)
+        print(f"Player {player(board)}'s turn.")
+        if player(board) == X:
+            player_move = input("Enter your move as 'row,col': ")
+            row, col = map(int, player_move.split(','))
+            board = result(board, (row, col))
+        else:
+            ai_move = random_move(board)
+            board = result(board, ai_move)
+    print("Game over.")
+    print_board(board)
+    print(f"Winner: {winner(board)}")
