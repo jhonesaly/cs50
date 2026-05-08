@@ -215,6 +215,7 @@ def print_board_list(boards):
         if row_idx < 2:
             print("   ".join(["-----------"] * num_boards))
 
+
 if __name__ == "__main__":
     board = initial_state()
 
