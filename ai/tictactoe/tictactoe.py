@@ -59,8 +59,15 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
+    i, j = action
+    # Check if the action is within the board limits
+    if i < 0 or i > 2 or j < 0 or j > 2:
+        raise Exception("invalid move")
+    # Check if the cell is already taken
+    if board[i][j] is not EMPTY:
+        raise Exception("invalid move")
     board_result = copy.deepcopy(board)
-    board_result[action[0]][action[1]] = player(board)
+    board_result[i][j] = player(board)
     return board_result
 
 
