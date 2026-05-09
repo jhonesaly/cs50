@@ -287,6 +287,7 @@ def play_game(ai_func, print_moves=False):
             print()
     return moves, winner(board)
 
+
 if __name__ == "__main__":
     num_games = 40
     print("Random (X) vs Minimax (O):")
@@ -325,10 +326,12 @@ if __name__ == "__main__":
         faster_moves_pct = 100 * (avg_minimax - avg_alphabeta) / avg_minimax
         print(f"AlphaBeta is faster by {faster_moves_pct:.2f}% in average moves.")
         if alphabeta_wins > minimax_wins:
-            win_diff_pct = 100 * (alphabeta_wins - minimax_wins) / minimax_wins if minimax_wins > 0 else 100.0
+            win_diff_pct = 100 * (alphabeta_wins - minimax_wins) / \
+                minimax_wins if minimax_wins > 0 else 100.0
             print(f"AlphaBeta wins {win_diff_pct:.2f}% more than Minimax against Random.")
         elif minimax_wins > alphabeta_wins:
-            win_diff_pct = 100 * (minimax_wins - alphabeta_wins) / alphabeta_wins if alphabeta_wins > 0 else 100.0
+            win_diff_pct = 100 * (minimax_wins - alphabeta_wins) / \
+                alphabeta_wins if alphabeta_wins > 0 else 100.0
             print(f"Minimax wins {win_diff_pct:.2f}% more than AlphaBeta against Random.")
         else:
             print("AlphaBeta and Minimax have the same win rate against Random.")
@@ -340,7 +343,6 @@ if __name__ == "__main__":
         print(f"AlphaBeta is faster by {faster_time_pct:.2f}% in processing time.\n")
     else:
         print("AlphaBeta and Minimax have the same processing time.\n")
-
 
     # 20 games: 10 Minimax (X) vs AlphaBeta (O), 10 AlphaBeta (X) vs Minimax (O)
     print("Minimax vs AlphaBeta (alternating who starts):")
@@ -403,7 +405,10 @@ if __name__ == "__main__":
                 draws += 1
     print(f"Average moves to finish: {sum(ia_moves)/ia_games:.2f}")
     print(f"Minimax wins: {minimax_ia_wins}/{ia_games} ({(minimax_ia_wins/ia_games)*100:.2f}%)")
-    print(f"AlphaBeta wins: {alphabeta_ia_wins}/{ia_games} ({(alphabeta_ia_wins/ia_games)*100:.2f}%)")
+    print(
+        f"AlphaBeta wins: {alphabeta_ia_wins}/{ia_games} ({(alphabeta_ia_wins/ia_games)*100:.2f}%)")
     print(f"Draws: {draws}/{ia_games} ({(draws/ia_games)*100:.2f}%)")
-    print(f"Total Minimax processing time: {minimax_time_total:.2f}s ({(minimax_time_total/(minimax_time_total+alphabeta_time_total)*100 if (minimax_time_total+alphabeta_time_total)>0 else 0):.2f}% of total)")
-    print(f"Total AlphaBeta processing time: {alphabeta_time_total:.2f}s ({(alphabeta_time_total/(minimax_time_total+alphabeta_time_total)*100 if (minimax_time_total+alphabeta_time_total)>0 else 0):.2f}% of total)\n")
+    print(
+        f"Total Minimax processing time: {minimax_time_total:.2f}s ({(minimax_time_total/(minimax_time_total+alphabeta_time_total)*100 if (minimax_time_total+alphabeta_time_total) > 0 else 0):.2f}% of total)")
+    print(
+        f"Total AlphaBeta processing time: {alphabeta_time_total:.2f}s ({(alphabeta_time_total/(minimax_time_total+alphabeta_time_total)*100 if (minimax_time_total+alphabeta_time_total) > 0 else 0):.2f}% of total)\n")
