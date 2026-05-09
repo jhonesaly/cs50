@@ -5,6 +5,7 @@ Tic Tac Toe Player
 import math
 import copy
 import random
+import time
 
 X = "X"
 O = "O"
@@ -151,6 +152,61 @@ def minimax(board):
     return best_move
 
 
+# New alphabeta function based on minimax, with alpha-beta pruning and depth-based heuristic
+def alphabeta(board):
+    """
+    Returns the optimal action for the current player using alpha-beta pruning.
+    Prioritizes faster wins (the lower the depth, the better).
+    """
+    def ab_rec(board, alpha, beta, maximizing, depth):
+        if terminal(board):
+            util = utility(board)
+            # Heuristic: the sooner you win, the better (depth)
+            if util == 1:
+                return util * (10 - depth)
+            elif util == -1:
+                return util * (10 - depth)
+            else:
+                return 0
+        if maximizing:
+            value = -float('inf')
+            for action in actions(board):
+                value = max(value, ab_rec(result(board, action), alpha, beta, False, depth + 1))
+                alpha = max(alpha, value)
+                if alpha >= beta:
+                    break
+            return value
+        else:
+            value = float('inf')
+            for action in actions(board):
+                value = min(value, ab_rec(result(board, action), alpha, beta, True, depth + 1))
+                beta = min(beta, value)
+                if beta <= alpha:
+                    break
+            return value
+
+    if terminal(board):
+        return None
+
+    current_player = player(board)
+    best_move = None
+    if current_player == X:
+        best_value = -float('inf')
+        for action in actions(board):
+            value = ab_rec(result(board, action), -float('inf'), float('inf'), False, 1)
+            if value > best_value:
+                best_value = value
+                best_move = action
+    else:
+        best_value = float('inf')
+        for action in actions(board):
+            value = ab_rec(result(board, action), -float('inf'), float('inf'), True, 1)
+            if value < best_value:
+                best_value = value
+                best_move = action
+    return best_move
+
+
 def get_value(board):
     """
     Recursively calculates the utility value of a given board state.
@@ -216,19 +272,138 @@ def print_board_list(boards):
             print("   ".join(["-----------"] * num_boards))
 
 
-if __name__ == "__main__":
+def play_game(ai_func, print_moves=False):
     board = initial_state()
-
-    while terminal(board) == False:
-        print_board(board)
-        print(f"Player {player(board)}'s turn.")
+    moves = 0
+    while not terminal(board):
         if player(board) == X:
-            player_move = input("Enter your move as 'row,col': ")
-            row, col = map(int, player_move.split(','))
-            board = result(board, (row, col))
+            move = random_move(board)
         else:
-            ai_move = minimax(board)
-            board = result(board, ai_move)
-    print("Game over.")
-    print_board(board)
-    print(f"Winner: {winner(board)}")
+            move = ai_func(board)
+        board = result(board, move)
+        moves += 1
+        if print_moves:
+            print_board(board)
+            print()
+    return moves, winner(board)
+
+if __name__ == "__main__":
+    num_games = 40
+    print("Random (X) vs Minimax (O):")
+    minimax_moves = []
+    minimax_wins = 0
+    start = time.time()
+    for _ in range(num_games):
+        moves, win = play_game(minimax)
+        minimax_moves.append(moves)
+        if win == O:
+            minimax_wins += 1
+    end = time.time()
+    minimax_time = end - start
+    print(f"Minimax average moves to finish: {sum(minimax_moves)/num_games:.2f}")
+    print(f"Minimax wins: {minimax_wins}/{num_games} ({(minimax_wins/num_games)*100:.2f}%)")
+    print(f"Total time: {minimax_time:.2f}s\n")
+
+    print("Random (X) vs AlphaBeta (O):")
+    alphabeta_moves = []
+    alphabeta_wins = 0
+    start = time.time()
+    for _ in range(num_games):
+        moves, win = play_game(alphabeta)
+        alphabeta_moves.append(moves)
+        if win == O:
+            alphabeta_wins += 1
+    end = time.time()
+    alphabeta_time = end - start
+    print(f"AlphaBeta average moves to finish: {sum(alphabeta_moves)/num_games:.2f}")
+    print(f"AlphaBeta wins: {alphabeta_wins}/{num_games} ({(alphabeta_wins/num_games)*100:.2f}%)")
+    print(f"Total time: {alphabeta_time:.2f}s\n")
+
+    avg_minimax = sum(minimax_moves)/num_games
+    avg_alphabeta = sum(alphabeta_moves)/num_games
+    if avg_minimax > 0:
+        faster_moves_pct = 100 * (avg_minimax - avg_alphabeta) / avg_minimax
+        print(f"AlphaBeta is faster by {faster_moves_pct:.2f}% in average moves.")
+        if alphabeta_wins > minimax_wins:
+            win_diff_pct = 100 * (alphabeta_wins - minimax_wins) / minimax_wins if minimax_wins > 0 else 100.0
+            print(f"AlphaBeta wins {win_diff_pct:.2f}% more than Minimax against Random.")
+        elif minimax_wins > alphabeta_wins:
+            win_diff_pct = 100 * (minimax_wins - alphabeta_wins) / alphabeta_wins if alphabeta_wins > 0 else 100.0
+            print(f"Minimax wins {win_diff_pct:.2f}% more than AlphaBeta against Random.")
+        else:
+            print("AlphaBeta and Minimax have the same win rate against Random.")
+    else:
+        print("AlphaBeta and Minimax have the same average moves.")
+
+    if minimax_time > 0:
+        faster_time_pct = 100 * (minimax_time - alphabeta_time) / minimax_time
+        print(f"AlphaBeta is faster by {faster_time_pct:.2f}% in processing time.\n")
+    else:
+        print("AlphaBeta and Minimax have the same processing time.\n")
+
+
+    # 20 games: 10 Minimax (X) vs AlphaBeta (O), 10 AlphaBeta (X) vs Minimax (O)
+    print("Minimax vs AlphaBeta (alternating who starts):")
+    ia_games = 20
+    minimax_ia_wins = 0
+    alphabeta_ia_wins = 0
+    draws = 0
+    ia_moves = []
+    minimax_time_total = 0.0
+    alphabeta_time_total = 0.0
+    for i in range(ia_games):
+        board = initial_state()
+        moves = 0
+        # Alternate who is X and who is O
+        if i < ia_games // 2:
+            # Minimax is X, AlphaBeta is O
+            X_func = minimax
+            O_func = alphabeta
+        else:
+            # AlphaBeta is X, Minimax is O
+            X_func = alphabeta
+            O_func = minimax
+        while not terminal(board):
+            if player(board) == X:
+                t0 = time.time()
+                move = X_func(board)
+                t1 = time.time()
+                if X_func == minimax:
+                    minimax_time_total += (t1 - t0)
+                else:
+                    alphabeta_time_total += (t1 - t0)
+            else:
+                t0 = time.time()
+                move = O_func(board)
+                t1 = time.time()
+                if O_func == minimax:
+                    minimax_time_total += (t1 - t0)
+                else:
+                    alphabeta_time_total += (t1 - t0)
+            board = result(board, move)
+            moves += 1
+        ia_moves.append(moves)
+        win = winner(board)
+        # Contabiliza vitórias considerando quem era X e O
+        if i < ia_games // 2:
+            # Minimax X, AlphaBeta O
+            if win == X:
+                minimax_ia_wins += 1
+            elif win == O:
+                alphabeta_ia_wins += 1
+            else:
+                draws += 1
+        else:
+            # AlphaBeta X, Minimax O
+            if win == X:
+                alphabeta_ia_wins += 1
+            elif win == O:
+                minimax_ia_wins += 1
+            else:
+                draws += 1
+    print(f"Average moves to finish: {sum(ia_moves)/ia_games:.2f}")
+    print(f"Minimax wins: {minimax_ia_wins}/{ia_games} ({(minimax_ia_wins/ia_games)*100:.2f}%)")
+    print(f"AlphaBeta wins: {alphabeta_ia_wins}/{ia_games} ({(alphabeta_ia_wins/ia_games)*100:.2f}%)")
+    print(f"Draws: {draws}/{ia_games} ({(draws/ia_games)*100:.2f}%)")
+    print(f"Total Minimax processing time: {minimax_time_total:.2f}s ({(minimax_time_total/(minimax_time_total+alphabeta_time_total)*100 if (minimax_time_total+alphabeta_time_total)>0 else 0):.2f}% of total)")
+    print(f"Total AlphaBeta processing time: {alphabeta_time_total:.2f}s ({(alphabeta_time_total/(minimax_time_total+alphabeta_time_total)*100 if (minimax_time_total+alphabeta_time_total)>0 else 0):.2f}% of total)\n")
