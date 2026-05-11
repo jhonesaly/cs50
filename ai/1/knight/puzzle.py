@@ -51,6 +51,9 @@ knowledge2 = And(
 # B says "A said 'I am a knave'."
 # B says "C is a knave."
 # C says "A is a knight."
+A_said_knight = Symbol("A said 'I am a Knight'")
+A_said_knave = Symbol("A said 'I am a Knave'")
+
 knowledge3 = And(
     Or(AKnight, AKnave),
     Not(And(AKnight, AKnave)),
@@ -59,11 +62,11 @@ knowledge3 = And(
     Or(CKnight, CKnave),
     Not(And(CKnight, CKnave)),
 
-    Implication(AKnight, Or(AKnight, AKnave)),
-    Implication(AKnave, Not(Or(AKnight, AKnave))),
+    Implication(AKnight, Or(A_said_knight, A_said_knave)),
+    Implication(AKnave, Not(Or(A_said_knight, A_said_knave))),
 
-    Implication(BKnight, And(AKnave)),
-    Implication(BKnave, Not(And(AKnave))),
+    Implication(BKnight, And(A_said_knave)),
+    Implication(BKnave, Not(And(A_said_knave))),
     Implication(BKnight, And(CKnave)),
     Implication(BKnave, Not(And(CKnave))),
     
