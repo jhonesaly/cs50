@@ -22,14 +22,28 @@ knowledge0 = And(
 # A says "We are both knaves."
 # B says nothing.
 knowledge1 = And(
-    # TODO
+    Or(AKnight, AKnave),
+    Not(And(AKnight, AKnave)),
+    Or(BKnight, BKnave),
+    Not(And(BKnight, BKnave)),
+
+    Implication(AKnight, And(AKnave, BKnave)),
+    Implication(AKnave, Not(And(AKnave, BKnave)))
 )
 
 # Puzzle 2
 # A says "We are the same kind."
 # B says "We are of different kinds."
 knowledge2 = And(
-    # TODO
+    # Or(AKnight, AKnave),
+    # Not(And(AKnight, AKnave)),
+    # Or(BKnight, BKnave),
+    # Not(And(BKnight, BKnave)),
+
+    # Implication(AKnight, And()),
+    # Implication(AKnave, Not(And())),
+    # Implication(BKnight, And()),
+    # Implication(BKnave, Not(And()))
 )
 
 # Puzzle 3
@@ -38,7 +52,19 @@ knowledge2 = And(
 # B says "C is a knave."
 # C says "A is a knight."
 knowledge3 = And(
-    # TODO
+    # Or(AKnight, AKnave),
+    # Not(And(AKnight, AKnave)),
+    # Or(BKnight, BKnave),
+    # Not(And(BKnight, BKnave)),
+    # Or(CKnight, CKnave),
+    # Not(And(CKnight, CKnave)),
+
+    # Implication(AKnight, And()),
+    # Implication(AKnave, Not(And())),
+    # Implication(BKnight, And()),
+    # Implication(BKnave, Not(And())),
+    # Implication(CKnight, And()),
+    # Implication(CKnave, Not(And()))
 )
 
 
