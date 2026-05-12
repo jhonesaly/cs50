@@ -118,14 +118,18 @@ class Sentence():
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.cells.remove(cell)
+            self.count -= 1
+
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.cells.remove(cell)
 
 
 class MinesweeperAI():
@@ -186,18 +190,22 @@ class MinesweeperAI():
         self.moves_made.add(cell)
         self.mark_safe(cell)
 
+        neighbors = set()
         for i in range(cell[0] - 1, cell[0] + 2):
             for j in range(cell[1] - 1, cell[1] + 2):
                 if (i, j) != cell and 0 <= i < self.height and 0 <= j < self.width:
+                    neighbors.add((i, j))
                     if count == 0:
                         self.mark_safe((i, j))
                         print(f"Marked {(i, j)} as safe based on count 0")
+                        continue
                     elif count == 8:
                         self.mark_mine((i, j))
                         print(f"Marked {(i, j)} as mine based on count 8")
-                    else:
-                        self.knowledge.append(Sentence([(i, j)], count))
-                        print(f"Added sentence: {self.knowledge[-1]}")
+                        continue
+
+        self.knowledge.append(Sentence(neighbors, count))
+        print(f"Added sentence: {self.knowledge[-1]}")
 
                     
 
