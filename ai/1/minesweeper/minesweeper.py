@@ -207,7 +207,10 @@ class MinesweeperAI():
         self.knowledge.append(Sentence(neighbors, count))
         print(f"Added sentence: {self.knowledge[-1]}")
 
-                    
+        self.knowledge = [s for s in self.knowledge if s.cells]
+
+        print(f"Current knowledge: {[str(sentence) for sentence in self.knowledge]}")
+
 
     def make_safe_move(self):
         """
