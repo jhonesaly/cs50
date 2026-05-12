@@ -209,6 +209,12 @@ class MinesweeperAI():
 
         self.knowledge = [s for s in self.knowledge if s.cells]
 
+        unique_knowledge = []
+        for sentence in self.knowledge:
+            if sentence not in unique_knowledge:
+                unique_knowledge.append(sentence)
+        self.knowledge = unique_knowledge
+
         print(f"Current knowledge: {[str(sentence) for sentence in self.knowledge]}")
 
 
