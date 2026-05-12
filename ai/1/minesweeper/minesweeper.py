@@ -182,7 +182,24 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+        print()
+        self.moves_made.add(cell)
+        self.mark_safe(cell)
+
+        for i in range(cell[0] - 1, cell[0] + 2):
+            for j in range(cell[1] - 1, cell[1] + 2):
+                if (i, j) != cell and 0 <= i < self.height and 0 <= j < self.width:
+                    if count == 0:
+                        self.mark_safe((i, j))
+                        print(f"Marked {(i, j)} as safe based on count 0")
+                    elif count == 8:
+                        self.mark_mine((i, j))
+                        print(f"Marked {(i, j)} as mine based on count 8")
+                    else:
+                        self.knowledge.append(Sentence([(i, j)], count))
+                        print(f"Added sentence: {self.knowledge[-1]}")
+
+                    
 
     def make_safe_move(self):
         """
@@ -193,10 +210,13 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+        print("make_safe_move called")
         for cell in self.safes:
             if cell not in self.moves_made:
+                print(f"Making safe move: {cell}")
                 self.moves_made.add(cell)
                 return cell
+        print("No safe moves available")
         return None
 
     def make_random_move(self):
@@ -206,6 +226,7 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
+        print("make_random_move called")
         choices = [
             (i, j)
             for i in range(self.height)
@@ -213,5 +234,9 @@ class MinesweeperAI():
             if (i, j) not in self.moves_made and (i, j) not in self.mines
         ]
         if choices:
-            return random.choice(choices)
+            move = random.choice(choices)
+            self.moves_made.add(move)
+            print(f"Making random move: {move}")
+            return move
+        print("No random moves available")
         return None
